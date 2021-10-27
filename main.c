@@ -4,8 +4,6 @@
 
 int main()
 {
-    time_t ntp_time;
-    ntp_time = NTP_Update();
-    printf( "Time: %s", ctime(&ntp_time));
+    printf("Difference with NTP server %f seconds\n", difftime(time(NULL), NTP_Update()));
     return 0;
 }

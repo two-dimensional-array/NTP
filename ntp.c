@@ -6,12 +6,13 @@ void error( char* msg )
     exit(0);
 }
 
-time_t NTP_Update(void)
+struct timeval NTP_Update(void)
 {
     int sockfd, n;
     struct sockaddr_in serv_addr;
     struct hostent* server;
     ntp_packet_t packet;
+    struct timeval ntp_time;
     memset(&packet, 0, sizeof(ntp_packet_t));
     packet.li = 0;
     packet.vn = 3;
@@ -36,11 +37,24 @@ time_t NTP_Update(void)
     }
     if (write(sockfd, &packet, sizeof(ntp_packet_t)) < 0)
     {
-        error( "ERROR writing to socket" );
+        error("ERROR writing to socket");
     }
     if (read(sockfd, &packet, sizeof(ntp_packet_t)) < 0)
     {
-        error( "ERROR reading from socket" );
+        error("ERROR reading from socket");
     }
-    return (ntohl(packet.tx_timesamp_s) - NTP_TIMESTAMP_DELTA);
+    ntp_time.tv_sec = (ntohl(packet.tx_timesamp_s) - NTP_TIMESTAMP_DELTA);
+    ntp_time.tv_usec = (ntohl(packet.tx_timesamp_f) / 4295); //translating fraction of seconds in milliseconds
+    return ntp_time;
+}
+
+double NTP_Difference(void)
+{
+    struct timeval ntp_time = NTP_Update();
+    struct timeval current_time;
+    double ntp_time_s = 0.0, current_time_s = 0.0;
+    gettimeofday(&current_time, NULL);
+    ntp_time_s = ntp_time.tv_sec + ((double)ntp_time.tv_usec / 1000000);
+    current_time_s = current_time.tv_sec + ((double)current_time.tv_usec / 1000000);
+    return ntp_time_s - current_time_s;
 }

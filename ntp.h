@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -42,6 +42,7 @@ typedef struct NTP_Packet
     uint32_t tx_timesamp_f;
 }ntp_packet_t;
 
-time_t NTP_Update(void);
+struct timeval NTP_Update(void);
+double NTP_Difference(void);
 
 #endif
